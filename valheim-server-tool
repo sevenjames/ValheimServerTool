@@ -4,8 +4,6 @@
 # Basic server management tasks for an already installed Valheim server.
 # Available commands: stop, start, restart, status, state, backup, update
 
-# test commit 202102271221
-
 # tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
 msginfo() { tput setaf 2; tput setab 0; echo "${1}"; tput sgr0; }
 msgwarn() { tput setaf 3; tput setab 0; echo "${1}"; tput sgr0; }
