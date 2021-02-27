@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# Valheim Server Tool
+# Basic server management tasks for an already installed Valheim server.
+# Available commands: stop, start, restart, status, state, backup, update
+
+# tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
+msginfo() { tput setaf 2; tput setab 0; echo "${1}"; tput sgr0; }
+msgwarn() { tput setaf 3; tput setab 0; echo "${1}"; tput sgr0; }
+msgerrr() { tput setaf 1; tput setab 0; tput bold; echo "${1}"; tput sgr0; }
+
+f_server_stop(){
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Stopping Valheim server..."
+    systemctl stop valheimserver.service
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is stopped."
+}
+
+f_server_start(){
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Starting Valheim server."
+    systemctl start valheimserver.service
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is started."
+    msgwarn "Server may require several minutes before accepting connections."
+}
+
+f_server_restart(){
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Restarting Valheim server."
+    systemctl restart valheimserver.service
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is started."
+    msgwarn "Server may require several minutes before accepting connections."
+}
+
+f_server_status(){
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim Server Status"
+    systemctl --no-pager status valheimserver.service | head -n 3
+}
+
+f_server_state(){
+    ServiceState=$(systemctl is-active valheimserver.service)
+    msginfo "Valheim server state: ${ServiceState}"
+}
+
+f_server_backup(){
+    DateTimeStamp="$(date +%Y%m%dt%H%M%S)"
+    SourcePath="/home/steam/.config/unity3d/IronGate/Valheim/worlds"
+    BackupPath="/home/steam/ValheimBackup"
+    FileName="ValheimBackup-${DateTimeStamp}.tgz"
+    BackupCountLimit="-14" # should be negative due to usage in head command below
+    # check server world files directory
+    if [[ ! -d "${SourcePath}" ]]; then
+        msgerrr "Server files not found. Exiting now."
+        exit 1
+    fi
+    f_server_stop
+    # create backup path if it doesn't exist
+    if [[ ! -d "${BackupPath}" ]]; then
+        msginfo "$(date +%Y%m%dt%H%M%S.%N) Creating backup directory..."
+        mkdir -p "${BackupPath}" && chown -f steam:steam "${BackupPath}"
+    fi
+    # create backup
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Backing up server world files..."
+    sudo -u steam bash -c "tar -czf \"${BackupPath}/${FileName}\" \"${SourcePath}\" 2> /dev/null"
+    # remove backups in excess of specified count
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Removing excess backups..."
+    find "${BackupPath}" -name "ValheimBackup*tgz" | sort | head -n ${BackupCountLimit} | xargs -r rm -f --
+    f_server_start
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server backup complete."
+}
+
+f_server_update(){
+    InstallPath="/home/steam/valheimserver"
+    # verify that server exists
+    if [[ ! -d "${InstallPath}" ]]; then
+        msgerrr "Valheim server is not installed. Exiting now."
+        exit 1
+    fi
+    f_server_stop
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Updating Valheim server..."
+    sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
+    chown -Rf steam:steam "${InstallPath}"
+    f_server_start
+    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server update complete."
+}
+
+f_usage(){
+    echo "Valheim Server Tool"
+    echo "Usage: $0 command"
+    echo "Available commands: stop, start, restart, status, state, backup, update"
+}
+
+# verify authority. exit if not root.
+if [[ $(id -u) -ne 0 ]]; then
+    msgerrr "Insufficient privileges."
+    msgwarn "This program requires root authority. Try again with sudo. Exiting now."
+    exit 1
+fi
+
+command="${1}"
+case "${command}" in
+    (stop) f_server_stop ;;
+    (start) f_server_start ;;
+    (restart) f_server_restart ;;
+    (status) f_server_status ;;
+    (state) f_server_state ;;
+    (backup) f_server_backup ;;
+    (update) f_server_update ;;
+    (*) f_usage ; exit 1 ;;
+esac
