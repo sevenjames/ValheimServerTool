@@ -1,12 +1,10 @@
 # Valheim Backup Script
 # for local Valheim installation on Windows
 
-# Makes a time-stamped compressed archive of the Valheim game data folder, 
+# Make a time-stamped compressed archive of the Valheim game data folder, 
 # (which includes player characters and local worlds),
-# and saves it into a backup folder in the user Documents folder.
-
-# TODO : Automate removal of old or excess archives.
-# Manual cleanup of old archives is required for now.
+# and save it into a backup folder in the user Documents folder.
+# Oldest archives in excess of the specified count are deleted.
 
 $TimeDateStamp = Get-Date -Format yyyy-MM-dd-HHmm
 $SourcePath = "$env:USERPROFILE\AppData\LocalLow\IronGate\Valheim\*"
@@ -28,7 +26,7 @@ if ( -Not (Test-Path "$BackupPath\$BackupDirName")) {
 	New-Item @NewParams | Out-Null
 }
 
-Write-Output "Checking for recent backup...`n$ThisBackupName.zip`n"
+Write-Output "Checking for recent backup...`n"
 if ( -Not (Test-Path "$BackupPath\$BackupDirName\$ThisBackupName.zip" )) {
 	Write-Output "Creating new backup...`n"
 	$NewParams = @{
