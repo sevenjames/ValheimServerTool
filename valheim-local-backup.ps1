@@ -13,7 +13,7 @@ $SourcePath = "$env:USERPROFILE\AppData\LocalLow\IronGate\Valheim\*"
 $BackupPath = "$env:USERPROFILE\Documents"
 $BackupDirName = "ValheimBackup"
 $ThisBackupName = "Valheim-$TimeDateStamp"
-$BackupCountLimit = 7
+$BackupCountLimit = 14
 
 Write-Output "Backing up files:`n$SourcePath`n"
 
@@ -68,7 +68,7 @@ if ( -Not (Test-Path "$BackupPath\$BackupDirName\$ThisBackupName.zip" )) {
 	@(Get-ChildItem "$BackupPath\$BackupDirName" -file -filter "Valheim-*.zip") |
 	Sort-Object -Property Name -Descending |
 	Select-Object -Skip $BackupCountLimit |
-	Remove-Item -WhatIf
+	Remove-Item
 	
 	Write-Output "Backup complete.`n$BackupPath\$BackupDirName\$ThisBackupName.zip`n"
 }
