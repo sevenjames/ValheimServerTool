@@ -13,6 +13,7 @@ $SourcePath = "$env:USERPROFILE\AppData\LocalLow\IronGate\Valheim\*"
 $BackupPath = "$env:USERPROFILE\Documents"
 $BackupDirName = "ValheimBackup"
 $ThisBackupName = "Valheim-$TimeDateStamp"
+$BackupCountLimit = 5
 
 Write-Output "Backing up files:`n$SourcePath`n"
 
@@ -54,12 +55,21 @@ if ( -Not (Test-Path "$BackupPath\$BackupDirName\$ThisBackupName.zip" )) {
 	Compress-Archive @CompressParams
 	
 	Write-Output "Cleaning up...`n"
+	# remove the now-redundant un-compressed copy
 	$RemoveParams = @{
 		Path = "$BackupPath\$BackupDirName\$ThisBackupName"
 		Force = $True
 		Recurse = $True
 	}
 	Remove-Item @RemoveParams
+	# remove backups in excess of specified count
+	$items = @(Get-ChildItem "$BackupPath\$BackupDirName" -file -filter "Valheim-*.zip")
+	if ($items.Count -gt $BackupCountLimit){
+		$items | 
+		Sort-Object -Property Name -Descending |
+		Select-Object -Skip $BackupCountLimit |
+		Remove-Item -WhatIf
+	}
 	
 	Write-Output "Backup complete.`n$BackupPath\$BackupDirName\$ThisBackupName.zip`n"
 }
