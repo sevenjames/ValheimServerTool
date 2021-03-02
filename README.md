@@ -5,5 +5,3 @@
 ## Supplemental Tool
 * valheim-local-backup.ps1
 * A powershell script to make local backups of local game data.
-* Note: does not remove old archives. Manual cleanup of old archives is required for now.
-
