@@ -40,6 +40,7 @@ f_server_state(){
 }
 
 f_server_backup(){
+    InitialServiceState=$(systemctl is-active valheimserver.service)
     DateTimeStamp="$(date +%Y%m%dt%H%M%S)"
     SourcePath="/home/steam/.config/unity3d/IronGate/Valheim/worlds"
     BackupPath="/home/steam/ValheimBackup"
@@ -50,7 +51,9 @@ f_server_backup(){
         msgerrr "Server files not found. Exiting now."
         exit 1
     fi
-    f_server_stop
+    if [[ ${InitialServiceState} = "active" ]]; then
+        f_server_stop
+    fi
     # create backup path if it doesn't exist
     if [[ ! -d "${BackupPath}" ]]; then
         msginfo "$(date +%Y%m%dt%H%M%S.%N) Creating backup directory..."
@@ -62,22 +65,29 @@ f_server_backup(){
     # remove backups in excess of specified count
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Removing excess backups..."
     find "${BackupPath}" -name "ValheimBackup*tgz" | sort | head -n ${BackupCountLimit} | xargs -r rm -f --
-    f_server_start
+    if [[ ${InitialServiceState} = "active" ]]; then
+        f_server_start
+    fi
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server backup complete."
 }
 
 f_server_update(){
+    InitialServiceState=$(systemctl is-active valheimserver.service)
     InstallPath="/home/steam/valheimserver"
     # verify that server exists
     if [[ ! -d "${InstallPath}" ]]; then
         msgerrr "Valheim server is not installed. Exiting now."
         exit 1
     fi
-    f_server_stop
+    if [[ ${InitialServiceState} = "active" ]]; then
+        f_server_stop
+    fi
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Updating Valheim server..."
     sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
     chown -Rf steam:steam "${InstallPath}"
-    f_server_start
+    if [[ ${InitialServiceState} = "active" ]]; then
+        f_server_start
+    fi
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server update complete."
 }
 
