@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# get new valheim server tool from github
+
+source="https://raw.githubusercontent.com/sevenjames/ValheimServerTool/main/valheim-server-tool"
+toolname="valheim-server-tool"
+
+if [[ ! -e "${toolname}" ]]; then
+    echo "no tool installed. getting it now."
+    curl -s -o "${toolname}" "${source}"
+    chmod +x "${toolname}"
+    echo "done"
+else
+    echo "checking for update"
+    tempname="valtemp$(date +%N)"
+    curl -s -o "${tempname}" "${source}"
+    newfilehash=$(sha256sum "${tempname}" | cut -d" " -f1)
+    currenthash=$(sha256sum "${toolname}" | cut -d" " -f1)
+    if [[ ${newfilehash} = ${currenthash} ]]; then
+        echo "installed tool is current"
+        rm "${tempname}"
+    else
+        echo "new version available. installing."
+        rm "${toolname}"
+        mv "${tempname}" "${toolname}"
+        chmod +x "${toolname}"
+        echo "done"
+    fi
+fi
