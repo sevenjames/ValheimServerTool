@@ -2,7 +2,7 @@
 
 # Valheim Server Tool
 # Basic server management tasks for an already installed Valheim server.
-# Available commands: stop, start, restart, status, state, backup, update
+# Available commands: stop, start, restart, status, backup, update
 
 # tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
 msginfo() { tput setaf 2; tput setab 0; echo "${1}"; tput sgr0; }
@@ -32,11 +32,6 @@ f_server_restart(){
 f_server_status(){
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim Server Status"
     systemctl --no-pager --full status valheimserver.service
-}
-
-f_server_state(){
-    ServiceState=$(systemctl is-active valheimserver.service)
-    msginfo "Valheim server state: ${ServiceState}"
 }
 
 f_server_backup(){
@@ -94,7 +89,7 @@ f_server_update(){
 f_usage(){
     echo "Valheim Server Tool"
     echo "Usage: $0 command"
-    echo "Available commands: stop, start, restart, status, state, backup, update"
+    echo "Available commands: stop, start, restart, status, backup, update"
 }
 
 # verify authority. exit if not root.
@@ -110,7 +105,6 @@ case "${command}" in
     (start) f_server_start ;;
     (restart) f_server_restart ;;
     (status) f_server_status ;;
-    (state) f_server_state ;;
     (backup) f_server_backup ;;
     (update) f_server_update ;;
     (*) f_usage ; exit 1 ;;
