@@ -31,7 +31,7 @@ f_server_restart(){
 
 f_server_status(){
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim Server Status"
-    systemctl --no-pager status valheimserver.service | head -n 3
+    systemctl --no-pager --full status valheimserver.service
 }
 
 f_server_state(){
