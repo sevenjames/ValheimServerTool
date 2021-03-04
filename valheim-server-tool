@@ -34,11 +34,12 @@ f_server_status(){
     systemctl --no-pager --full status valheimserver.service
 }
 
-f_server_checkforupdate(){
+f_server_versioncheck(){
     currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
     installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
-    echo "Current Version:   ${currentversion}"
-    echo "Installed Version: ${installedversion}"
+    msgerrr "Disregard this info. Version check is not accurate."
+    msgwarn "Current Version:   ${currentversion}"
+    msgwarn "Installed Version: ${installedversion}"
 }
 
 f_server_backup(){
@@ -114,6 +115,6 @@ case "${command}" in
     (status) f_server_status ;;
     (backup) f_server_backup ;;
     (update) f_server_update ;;
-    (check) f_server_checkforupdate ;;
+    (check) f_server_versioncheck ;;
     (*) f_usage ; exit 1 ;;
 esac
