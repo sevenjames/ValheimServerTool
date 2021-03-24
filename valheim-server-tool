@@ -7,6 +7,7 @@
 # tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
 msginfo() { tput setaf 2; tput setab 0; echo "${1}"; tput sgr0; }
 msgwarn() { tput setaf 3; tput setab 0; echo "${1}"; tput sgr0; }
+msgdbug() { tput setaf 6; tput setab 0; echo "${1}"; tput sgr0; }
 msgerrr() { tput setaf 1; tput setab 0; tput bold; echo "${1}"; tput sgr0; }
 
 f_server_stop(){
