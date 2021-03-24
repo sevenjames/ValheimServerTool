@@ -5,33 +5,33 @@
 # Available commands: stop, start, restart, status, backup, update
 
 # tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
-msginfo() { tput setaf 2; tput setab 0; echo "${1}"; tput sgr0; }
-msgwarn() { tput setaf 3; tput setab 0; echo "${1}"; tput sgr0; }
-msgdbug() { tput setaf 6; tput setab 0; echo "${1}"; tput sgr0; }
-msgerrr() { tput setaf 1; tput setab 0; tput bold; echo "${1}"; tput sgr0; }
+msginfo() { tput setaf 2; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
+msgwarn() { tput setaf 3; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
+msgdbug() { tput setaf 6; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
+msgerrr() { tput setaf 1; tput setab 0; tput bold; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
 
 f_server_stop() {
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Stopping Valheim server..."
+    msginfo "Stopping Valheim server..."
     systemctl stop valheimserver.service
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is stopped."
+    msginfo "Valheim server is stopped."
 }
 
 f_server_start() {
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Starting Valheim server."
+    msginfo "Starting Valheim server."
     systemctl start valheimserver.service
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is started."
+    msginfo "Valheim server is started."
     msgwarn "Server may require several minutes before accepting connections."
 }
 
 f_server_restart() {
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Restarting Valheim server."
+    msginfo "Restarting Valheim server."
     systemctl restart valheimserver.service
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server is started."
+    msginfo "Valheim server is started."
     msgwarn "Server may require several minutes before accepting connections."
 }
 
 f_server_status() {
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim Server Status"
+    msginfo "Valheim Server Status"
     systemctl --no-pager --full status valheimserver.service
 }
 
@@ -52,19 +52,19 @@ f_server_backup() {
     fi
     # create backup path if it doesn't exist
     if [[ ! -d "${BackupPath}" ]]; then
-        msginfo "$(date +%Y%m%dt%H%M%S.%N) Creating backup directory..."
+        msginfo "Creating backup directory..."
         mkdir -p "${BackupPath}" && chown -f steam:steam "${BackupPath}"
     fi
     # create backup
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Backing up server world files..."
+    msginfo "Backing up server world files..."
     sudo -u steam bash -c "tar -czf \"${BackupPath}/${FileName}\" \"${SourcePath}\" 2> /dev/null"
     # remove backups in excess of specified count
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Removing excess backups..."
+    msginfo "Removing excess backups..."
     find "${BackupPath}" -name "ValheimBackup*tgz" | sort | head -n ${BackupCountLimit} | xargs -r rm -f --
     if [[ ${InitialServiceState} = "active" ]]; then
         f_server_start
     fi
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server backup complete."
+    msginfo "Valheim server backup complete."
 }
 
 f_server_update() {
@@ -78,13 +78,13 @@ f_server_update() {
     if [[ ${InitialServiceState} = "active" ]]; then
         f_server_stop
     fi
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Updating Valheim server..."
+    msginfo "Updating Valheim server..."
     sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
     chown -Rf steam:steam "${InstallPath}"
     if [[ ${InitialServiceState} = "active" ]]; then
         f_server_start
     fi
-    msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server update complete."
+    msginfo "Valheim server update complete."
 }
 
 f_server_versioncheck() {
