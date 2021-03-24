@@ -34,14 +34,6 @@ f_server_status(){
     systemctl --no-pager --full status valheimserver.service
 }
 
-f_server_versioncheck(){
-    currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
-    installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
-    msgerrr "Disregard this info. Version check is not accurate."
-    msgwarn "Current Version:   ${currentversion}"
-    msgwarn "Installed Version: ${installedversion}"
-}
-
 f_server_backup(){
     InitialServiceState=$(systemctl is-active valheimserver.service)
     DateTimeStamp="$(date +%Y%m%dt%H%M%S)"
@@ -92,6 +84,16 @@ f_server_update(){
         f_server_start
     fi
     msginfo "$(date +%Y%m%dt%H%M%S.%N) Valheim server update complete."
+}
+
+f_server_versioncheck(){
+    # need to delete the appinfo.vdf file first otherwise version check is wrong.
+    find "/home" "/root" -wholename "*/.steam/appcache/appinfo.vdf" | xargs -r rm -f --
+    currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
+    installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
+    msgerrr "Disregard this info. Version check is not accurate."
+    msgwarn "Current Version:   ${currentversion}"
+    msgwarn "Installed Version: ${installedversion}"
 }
 
 f_usage(){
