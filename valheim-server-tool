@@ -68,7 +68,6 @@ f_server_backup() {
 }
 
 f_server_update() {
-    # this might all be pointless; steam may be doing this automatically.
     InstallPath="/home/steam/valheimserver"
     # verify that server exists
     if [[ -d "${InstallPath}" ]]; then
@@ -77,8 +76,8 @@ f_server_update() {
         find "/home" "/root" -wholename "*/.steam/appcache/appinfo.vdf" | xargs -r rm -f --
         currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
         installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
-        msgdbug "Current Version:   ${currentversion}"
-        msgdbug "Installed Version: ${installedversion}"
+        msginfo "Current Version:   ${currentversion}"
+        msginfo "Installed Version: ${installedversion}"
         if (( ${currentversion} > ${installedversion} )); then
             msginfo "An update is available. Install the update? (Yes/No)"
             read -r userinput
@@ -91,11 +90,11 @@ f_server_update() {
                 msginfo "Valheim server update complete."
                 if [[ ${InitialServiceState} = "active" ]]; then f_server_start; fi
             else
-                msginfo "Valheim server update cancelled."
+                msgwarn "Valheim server update cancelled."
                 exit 3
             fi
         else
-            msginfo "No update available."
+            msgwarn "No update available."
             exit 2
         fi
     else
