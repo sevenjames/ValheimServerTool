@@ -32,7 +32,7 @@ f_server_restart() {
 
 f_server_status() {
     msginfo "Valheim Server Status"
-    systemctl --no-pager --full status valheimserver.service
+    systemctl --no-pager status valheimserver.service | head -n 3
 }
 
 f_server_backup() {
