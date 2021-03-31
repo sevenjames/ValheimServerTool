@@ -47,9 +47,7 @@ f_server_backup() {
         msgerrr "Server files not found. Exiting now."
         exit 1
     fi
-    if [[ ${InitialServiceState} = "active" ]]; then
-        f_server_stop
-    fi
+    if [[ ${InitialServiceState} = "active" ]]; then f_server_stop; fi
     # create backup path if it doesn't exist
     if [[ ! -d "${BackupPath}" ]]; then
         msginfo "Creating backup directory..."
@@ -61,9 +59,7 @@ f_server_backup() {
     # remove backups in excess of specified count
     msginfo "Removing excess backups..."
     find "${BackupPath}" -name "ValheimBackup*tgz" | sort | head -n ${BackupCountLimit} | xargs -r rm -f --
-    if [[ ${InitialServiceState} = "active" ]]; then
-        f_server_start
-    fi
+    if [[ ${InitialServiceState} = "active" ]]; then f_server_start; fi
     msginfo "Valheim server backup complete."
 }
 
@@ -82,15 +78,15 @@ f_server_update() {
     msginfo "Available Version: ${currentversion}"
     msginfo "Installed Version: ${installedversion}"
     if [[ "${currentversion}" = "${installedversion}" ]]; then
-        msgwarn "No update available."
+        msginfo "No update available."
         exit 1
     fi
     msginfo "An update is available. Install the update? (Yes/No)"
     read -r userinput
     if [[ "$userinput" =~ ^(Y|y|Yes|yes)$ ]]; then
-        msginfo "Updating Valheim server..."
         InitialServiceState=$(systemctl is-active valheimserver.service)
         if [[ ${InitialServiceState} = "active" ]]; then f_server_stop; fi
+        msginfo "Updating Valheim server..."
         sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
         chown -Rf steam:steam "${InstallPath}"
         msginfo "Valheim server update complete."
@@ -105,12 +101,13 @@ f_usage() {
     echo "Valheim Server Tool"
     echo "Usage: $0 command"
     echo "Available commands: stop, start, restart, status, backup, update"
+    exit 1
 }
 
 # verify authority. exit if not root.
 if [[ $(id -u) -ne 0 ]]; then
-    msgerrr "Insufficient privileges."
-    msgwarn "This program requires root authority. Try again with sudo. Exiting now."
+    echo "Insufficient privileges."
+    echo "This program requires root authority. Try again with sudo. Exiting now."
     exit 1
 fi
 
