@@ -69,36 +69,34 @@ f_server_backup() {
 
 f_server_update() {
     InstallPath="/home/steam/valheimserver"
-    # verify that server exists
-    if [[ -d "${InstallPath}" ]]; then
-        msginfo "Checking for updates..."
-        # appinfo cache file must be deleted for version check to work.
-        find "/home" "/root" -wholename "*/.steam/appcache/appinfo.vdf" | xargs -r rm -f --
-        currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
-        installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
-        msginfo "Current Version:   ${currentversion}"
-        msginfo "Installed Version: ${installedversion}"
-        if (( ${currentversion} > ${installedversion} )); then
-            msginfo "An update is available. Install the update? (Yes/No)"
-            read -r userinput
-            if [[ "$userinput" =~ ^(Y|y|Yes|yes)$ ]]; then
-                msginfo "Updating Valheim server..."
-                InitialServiceState=$(systemctl is-active valheimserver.service)
-                if [[ ${InitialServiceState} = "active" ]]; then f_server_stop; fi
-                sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
-                chown -Rf steam:steam "${InstallPath}"
-                msginfo "Valheim server update complete."
-                if [[ ${InitialServiceState} = "active" ]]; then f_server_start; fi
-            else
-                msgwarn "Valheim server update cancelled."
-                exit 3
-            fi
-        else
-            msgwarn "No update available."
-            exit 2
-        fi
+    if [[ ! -d "${InstallPath}" ]]; then
+        msgerrr "Valheim server not found."
+        msgerrr "Expected server path: ${InstallPath}"
+        exit 1
+    fi
+    msginfo "Checking for updates..."
+    # appinfo cache file must be deleted for version check to work.
+    find "/home" "/root" -wholename "*/.steam/appcache/appinfo.vdf" | xargs -r rm -f --
+    currentversion=$(/home/steam/steamcmd +login anonymous +app_info_update 1 +app_info_print 896660 +quit | tr -d '[:space:]' | sed -r 's/.*branches...public...buildid..([0-9]*)..timeupdated.*/\1/')
+    installedversion=$(awk -F '"' '$2 == "buildid" {print $4}' /home/steam/valheimserver/steamapps/appmanifest_896660.acf)
+    msginfo "Available Version: ${currentversion}"
+    msginfo "Installed Version: ${installedversion}"
+    if [[ "${currentversion}" = "${installedversion}" ]]; then
+        msgwarn "No update available."
+        exit 1
+    fi
+    msginfo "An update is available. Install the update? (Yes/No)"
+    read -r userinput
+    if [[ "$userinput" =~ ^(Y|y|Yes|yes)$ ]]; then
+        msginfo "Updating Valheim server..."
+        InitialServiceState=$(systemctl is-active valheimserver.service)
+        if [[ ${InitialServiceState} = "active" ]]; then f_server_stop; fi
+        sudo -u steam /home/steam/steamcmd +login anonymous +force_install_dir "${InstallPath}" +app_update 896660 validate +exit
+        chown -Rf steam:steam "${InstallPath}"
+        msginfo "Valheim server update complete."
+        if [[ ${InitialServiceState} = "active" ]]; then f_server_start; fi
     else
-        msgerrr "Valheim server is not installed."
+        msgwarn "Valheim server update cancelled."
         exit 1
     fi
 }
