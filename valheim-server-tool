@@ -2,13 +2,40 @@
 
 # Valheim Server Tool
 # Basic server management tasks for an already installed Valheim server.
-# Available commands: stop, start, restart, status, backup, update
+
+# verify authority. exit if not root.
+if [[ $(id -u) -ne 0 ]]; then
+    echo "Insufficient privileges."
+    echo "This program requires root authority. Try again with sudo. Exiting now."
+    exit 1
+fi
 
 # tput colors: 0=black,1=red,2=green,3=yellow,4=blue,5=magenta,6=cyan,7=white,9=default
 msginfo() { tput setaf 2; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
 msgwarn() { tput setaf 3; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
 msgdbug() { tput setaf 6; tput setab 0; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
 msgerrr() { tput setaf 1; tput setab 0; tput bold; echo "$(date +%Y%m%dt%H%M%S.%N) ${1}"; tput sgr0; }
+
+thecommand="${1}"
+
+main() {
+    case "${thecommand}" in
+        (stop) f_server_stop ;;
+        (start) f_server_start ;;
+        (restart) f_server_restart ;;
+        (status) f_server_status ;;
+        (backup) f_server_backup ;;
+        (update) f_server_update ;;
+        (*) f_usage ; exit 1 ;;
+    esac
+}
+
+f_usage() {
+    msgwarn "Valheim Server Tool"
+    msgwarn "Usage: $0 command"
+    msgwarn "Available commands: stop, start, restart, status, backup, update"
+    exit 1
+}
 
 f_server_stop() {
     msginfo "Stopping Valheim server..."
@@ -103,27 +130,4 @@ f_server_update() {
     fi
 }
 
-f_usage() {
-    echo "Valheim Server Tool"
-    echo "Usage: $0 command"
-    echo "Available commands: stop, start, restart, status, backup, update"
-    exit 1
-}
-
-# verify authority. exit if not root.
-if [[ $(id -u) -ne 0 ]]; then
-    echo "Insufficient privileges."
-    echo "This program requires root authority. Try again with sudo. Exiting now."
-    exit 1
-fi
-
-command="${1}"
-case "${command}" in
-    (stop) f_server_stop ;;
-    (start) f_server_start ;;
-    (restart) f_server_restart ;;
-    (status) f_server_status ;;
-    (backup) f_server_backup ;;
-    (update) f_server_update ;;
-    (*) f_usage ; exit 1 ;;
-esac
+main
