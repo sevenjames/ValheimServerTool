@@ -24,6 +24,7 @@ main() {
         (start) f_server_start ;;
         (restart) f_server_restart ;;
         (status) f_server_status ;;
+        (config) f_server_config ;;
         (backup) f_server_backup ;;
         (update) f_server_update ;;
         (*) f_usage ; exit 1 ;;
@@ -33,7 +34,7 @@ main() {
 f_usage() {
     msgwarn "Valheim Server Tool"
     msgwarn "Usage: $0 command"
-    msgwarn "Available commands: stop, start, restart, status, backup, update"
+    msgwarn "Available commands: stop, start, restart, status, config, backup, update"
     exit 1
 }
 
@@ -60,6 +61,11 @@ f_server_restart() {
 f_server_status() {
     msginfo "Valheim Server Status"
     systemctl --no-pager status valheimserver.service | head -n 3
+}
+
+f_server_config() {
+    msginfo "Valheim Server Configuration"
+    systemctl cat valheimserver.service
 }
 
 f_server_backup() {
