@@ -1,6 +1,6 @@
 ## Valheim Server Tool
 * Basic server management tasks for an already installed Valheim server.
-* Available commands: stop, start, restart, status, backup, update
+* Available commands: stop, start, restart, status, config, backup, update
 
 ## valtoolupdt
 * mini tool to download or update the server tool
