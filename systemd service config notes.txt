@@ -1,0 +1,34 @@
+## SUMMARY OF SERVICE CONFIGURATION STEPS
+
+# check service status. repeat between steps as desired.
+systemctl --no-pager --full status valheimserver.service
+
+# stop the service
+sudo systemctl stop valheimserver.service
+
+# edit the service unit file
+sudo nano /lib/systemd/system/valheimserver.service
+
+# reload systemd configuration
+sudo systemctl daemon-reload
+
+# enable the service
+systemctl enable valheimserver.service
+
+# start the service
+sudo systemctl start valheimserver.service
+
+
+## REFERENCES
+
+man systemctl
+
+man systemd.service
+	ExecReload
+		"reloading a daemon by sending a signal (as with the example "/bin/kill -HUP $MAINPID") is usually not a good choice"
+		"reload is optional and should be left undefined if there is no true reload functionality"
+		(kill and restart is not true reload functionality)
+
+man systemd.unit
+	StartLimitIntervalSec=interval
+	StartLimitBurst=burst
