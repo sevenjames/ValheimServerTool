@@ -34,9 +34,9 @@ main() {
 }
 
 f_usage() {
-    msgwarn "Valheim Server Tool"
-    msgwarn "Usage: $0 command"
-    msgwarn "Available commands: stop, start, restart, status, config, enable, disable, backup, update"
+    echo "Valheim Server Tool"
+    echo "Usage: $0 command"
+    echo "Available commands: stop, start, restart, status, config, enable, disable, backup, update"
     exit 1
 }
 
