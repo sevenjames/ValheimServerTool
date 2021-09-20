@@ -27,6 +27,8 @@ main() {
         (config) f_server_config ;;
         (backup) f_server_backup ;;
         (update) f_server_update ;;
+        (enable) f_server_enable ;;
+        (disable) f_server_disable ;;
         (*) f_usage ; exit 1 ;;
     esac
 }
@@ -34,7 +36,7 @@ main() {
 f_usage() {
     msgwarn "Valheim Server Tool"
     msgwarn "Usage: $0 command"
-    msgwarn "Available commands: stop, start, restart, status, config, backup, update"
+    msgwarn "Available commands: stop, start, restart, status, config, enable, disable, backup, update"
     exit 1
 }
 
@@ -66,6 +68,18 @@ f_server_status() {
 f_server_config() {
     msginfo "Valheim Server Configuration"
     systemctl cat valheimserver.service
+}
+
+f_server_enable() {
+    msginfo "Enabling Valheim server..."
+    systemctl enable valheimserver.service
+    msginfo "Valheim server is enabled."
+}
+
+f_server_disable() {
+    msginfo "Disabling Valheim server..."
+    systemctl disable valheimserver.service
+    msginfo "Valheim server is disabled."
 }
 
 f_server_backup() {
